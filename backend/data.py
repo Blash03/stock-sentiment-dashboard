@@ -21,7 +21,7 @@ def get_stock_data(ticker, days=30):
 def get_news(ticker):
     url = (
         f"https://newsapi.org/v2/everything?"
-        f"q={ticker}&"
+        f"q={ticker}+stock&"
         f"language=en&"
         f"sortBy=publishedAt&"
         f"pageSize=30&"
