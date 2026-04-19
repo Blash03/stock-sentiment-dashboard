@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 
 HF_TOKEN = os.getenv("HF_TOKEN")
 API_URL = "https://router.huggingface.co/hf-inference/models/ProsusAI/finbert"
@@ -17,9 +18,16 @@ def analyze_sentiment(headlines):
                 headers=HEADERS,
                 json={"inputs": title[:512]}
             )
-            data = response.json()
+            # Handle response whether it comes back as string or parsed
+            raw = response.text
+            data = json.loads(raw)
+            
             if isinstance(data, list) and len(data) > 0:
-                scores = data[0]
+                inner = data[0]
+                if isinstance(inner, list):
+                    scores = inner
+                else:
+                    scores = data
                 best = max(scores, key=lambda x: x['score'])
                 label = best['label'].lower()
                 score = best['score']
