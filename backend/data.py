@@ -1,3 +1,4 @@
+cat > backend/data.py <<'PY'
 import yfinance as yf
 import requests
 import pandas as pd
@@ -19,16 +20,28 @@ def get_news(ticker):
     if not NEWS_API_KEY:
         return []
 
-    url = (
-        f"https://newsapi.org/v2/everything?"
-        f"q={ticker}+stock&"
-        f"language=en&"
-        f"sortBy=publishedAt&"
-        f"pageSize=12&"
-        f"apiKey={NEWS_API_KEY}"
-    )
+    company_name = ""
     try:
-        response = requests.get(url, timeout=12)
+        company_name = (yf.Ticker(ticker).info or {}).get("shortName", "")
+    except Exception:
+        company_name = ""
+
+    query_terms = [f"\"{ticker}\"", f"{ticker} stock"]
+    if company_name:
+        query_terms.extend([f"\"{company_name}\"", f"{company_name} stock"])
+    query = " OR ".join(query_terms)
+
+    url = "https://newsapi.org/v2/everything"
+    params = {
+        "q": query,
+        "language": "en",
+        "sortBy": "publishedAt",
+        "searchIn": "title,description",
+        "pageSize": 30,
+        "apiKey": NEWS_API_KEY,
+    }
+    try:
+        response = requests.get(url, params=params, timeout=12)
         response.raise_for_status()
         articles = response.json().get('articles', [])
     except requests.RequestException:
@@ -50,3 +63,4 @@ def get_news(ticker):
             'url': article_url or ''
         })
     return news
+PY
