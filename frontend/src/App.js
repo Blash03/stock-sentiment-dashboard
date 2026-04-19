@@ -90,7 +90,7 @@ export default function App() {
     return {
       date: p.date.slice(5),
       price: parseFloat(p.close.toFixed(2)),
-      sentiment: match ? match.score : 0,
+      sentiment: match ? match.score : null,
     };
   });
 
