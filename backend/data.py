@@ -1,3 +1,4 @@
+cat > backend/data.py <<'PY'
 import yfinance as yf
 import requests
 import pandas as pd
@@ -62,3 +63,4 @@ def get_news(ticker):
             'url': article_url or ''
         })
     return news
+PY
