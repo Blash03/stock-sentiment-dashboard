@@ -1,0 +1,7 @@
+cat > railway.toml << 'EOF'
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "gunicorn app:app --host 0.0.0.0 --port $PORT"
+EOF
