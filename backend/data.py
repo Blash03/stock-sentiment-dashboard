@@ -24,9 +24,12 @@ def get_stock_data(ticker, days=30):
 
 def get_news(ticker):
     company_name = get_company_name(ticker)
+    # Use first word only for matching (e.g. "Apple" from "Apple Inc.")
+    company_short = company_name.split()[0]
+    
     url = (
         f"https://newsapi.org/v2/everything?"
-        f"q={company_name}+stock&"
+        f"q={company_short}+stock&"
         f"language=en&"
         f"sortBy=publishedAt&"
         f"pageSize=50&"
@@ -38,7 +41,7 @@ def get_news(ticker):
     for article in articles:
         title = article['title'] or ''
         ticker_match = ticker.lower() in title.lower()
-        name_match = company_name.lower() in title.lower()
+        name_match = company_short.lower() in title.lower()
         if not ticker_match and not name_match:
             continue
         news.append({
