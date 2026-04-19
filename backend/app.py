@@ -15,6 +15,24 @@ def add_cors_headers(response):
 def after_request(response):
     return add_cors_headers(response)
 
+@app.route('/api/debug/sentiment')
+def debug_sentiment():
+    import requests
+    hf_token = os.getenv("HF_TOKEN")
+    headers = {"Authorization": f"Bearer {hf_token}"}
+    try:
+        response = requests.post(
+            "https://router.huggingface.co/hf-inference/models/ProsusAI/finbert",
+            headers=headers,
+            json={"inputs": "Apple stock hits record high"}
+        )
+        return jsonify({
+            'status_code': response.status_code,
+            'response': response.text[:500]
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 @app.route('/api/debug')
 def debug():
     hf_token = os.getenv("HF_TOKEN")
