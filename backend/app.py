@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from data import get_stock_data, get_news
 from sentiment import analyze_sentiment
+import os
 
 app = Flask(__name__)
 
@@ -13,6 +14,17 @@ def add_cors_headers(response):
 @app.after_request
 def after_request(response):
     return add_cors_headers(response)
+
+@app.route('/api/debug')
+def debug():
+    hf_token = os.getenv("HF_TOKEN")
+    news_key = os.getenv("NEWS_API_KEY")
+    return jsonify({
+        'hf_token_present': hf_token is not None,
+        'hf_token_length': len(hf_token) if hf_token else 0,
+        'news_key_present': news_key is not None,
+        'news_key_length': len(news_key) if news_key else 0,
+    })
 
 @app.route('/api/stock/<ticker>')
 def stock(ticker):
