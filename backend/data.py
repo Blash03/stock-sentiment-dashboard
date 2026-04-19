@@ -3,11 +3,8 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
-
 
 def get_stock_data(ticker, days=30):
     end = datetime.today()

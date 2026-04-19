@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from data import get_stock_data, get_news
 from sentiment import analyze_sentiment
 
