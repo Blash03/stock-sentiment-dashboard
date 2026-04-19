@@ -85,14 +85,24 @@ export default function App() {
     fontFamily: "'Courier New', monospace",
   });
 
-  const chartData = priceData.map((p) => {
-    const match = articles.find((a) => a.date === p.date);
-    return {
-      date: p.date.slice(5),
-      price: parseFloat(p.close.toFixed(2)),
-      sentiment: match ? match.score : null,
-    };
-  });
+  const rawChartData = priceData.map((p) => {
+  const match = articles.find((a) => a.date === p.date);
+  return {
+    date: p.date.slice(5),
+    price: parseFloat(p.close.toFixed(2)),
+    sentiment: match ? match.score : null,
+  };
+});
+
+// Forward-fill sentiment so line connects across null days
+let lastSentiment = null;
+const chartData = rawChartData.map((d) => {
+  if (d.sentiment !== null) lastSentiment = d.sentiment;
+  return {
+    ...d,
+    sentiment: lastSentiment,
+  };
+});
 
   return (
     <div style={{
