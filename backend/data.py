@@ -19,11 +19,23 @@ def get_news(ticker):
     if not NEWS_API_KEY:
         return []
 
+    company_name = ""
+    try:
+        company_name = (yf.Ticker(ticker).info or {}).get("shortName", "")
+    except Exception:
+        company_name = ""
+
+    query_terms = [f"\"{ticker}\"", f"{ticker} stock"]
+    if company_name:
+        query_terms.extend([f"\"{company_name}\"", f"{company_name} stock"])
+    query = " OR ".join(query_terms)
+
     url = "https://newsapi.org/v2/everything"
     params = {
-        "q": f"{ticker} stock",
+        "q": query,
         "language": "en",
         "sortBy": "publishedAt",
+        "searchIn": "title,description",
         "pageSize": 30,
         "apiKey": NEWS_API_KEY,
     }

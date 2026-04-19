@@ -85,23 +85,12 @@ export default function App() {
     fontFamily: "'Courier New', monospace",
   });
 
-    const sentimentByDate = articles.reduce((acc, article) => {
-    if (!acc[article.date]) acc[article.date] = [];
-    acc[article.date].push(article.score);
-    return acc;
-  }, {});
-
-  let lastSentiment = 0;
   const chartData = priceData.map((p) => {
-    const dayScores = sentimentByDate[p.date];
-    if (dayScores && dayScores.length) {
-      const dailyAverage = dayScores.reduce((sum, value) => sum + value, 0) / dayScores.length;
-      lastSentiment = parseFloat(dailyAverage.toFixed(3));
-    }
+    const match = articles.find((a) => a.date === p.date);
     return {
       date: p.date.slice(5),
       price: parseFloat(p.close.toFixed(2)),
-      sentiment: lastSentiment,
+      sentiment: match ? match.score : 0,
     };
   });
 
