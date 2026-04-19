@@ -13,7 +13,7 @@ def get_company_name(ticker):
     except:
         return ticker
 
-def get_stock_data(ticker, days=180):
+def get_stock_data(ticker, days=30):
     end = datetime.today()
     start = end - timedelta(days=days)
     df = yf.download(ticker, start=start, end=end)
