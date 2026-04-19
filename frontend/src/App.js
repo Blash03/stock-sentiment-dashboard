@@ -213,7 +213,7 @@ export default function App() {
             {/* Chart */}
             <div style={{ ...card, marginBottom: "24px" }}>
               <h2 style={{ fontSize: "10px", fontWeight: "600", margin: "0 0 24px 0", color: colors.muted, textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Courier New', monospace" }}>
-                Price & Sentiment — Last 30 Days
+                Price & Sentiment — Last 6 Months
               </h2>
               <ResponsiveContainer width="100%" height={280}>
                 <ComposedChart data={chartData}>

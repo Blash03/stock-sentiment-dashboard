@@ -13,7 +13,7 @@ def get_company_name(ticker):
     except:
         return ticker
 
-def get_stock_data(ticker, days=30):
+def get_stock_data(ticker, days=180):
     end = datetime.today()
     start = end - timedelta(days=days)
     df = yf.download(ticker, start=start, end=end)
@@ -32,7 +32,7 @@ def get_news(ticker):
         f"q={company_short}+stock&"
         f"language=en&"
         f"sortBy=publishedAt&"
-        f"pageSize=50&"
+        f"pageSize=100&"
         f"apiKey={NEWS_API_KEY}"
     )
     response = requests.get(url)
