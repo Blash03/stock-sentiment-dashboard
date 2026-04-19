@@ -1,4 +1,3 @@
-cat > backend/sentiment.py <<'PY'
 import requests
 import os
 
@@ -58,4 +57,3 @@ def analyze_sentiment(headlines):
         return []
 
     return results
-PY
