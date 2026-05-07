@@ -11,7 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const API_BASE = "https://stock-sentiment-dashboard-production.up.railway.app";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "https://stock-sentiment-dashboard-production.up.railway.app";
+const REQUEST_TIMEOUT = 45000;
 
 const colors = {
   bg: "#F5F0E8",
@@ -49,8 +50,8 @@ export default function App() {
     setError(null);
     try {
       const [priceRes, sentimentRes] = await Promise.all([
-        axios.get(`${API_BASE}/api/stock/${ticker}`),
-        axios.get(`${API_BASE}/api/sentiment/${ticker}`),
+        axios.get(`${API_BASE}/api/stock/${ticker}`, { timeout: REQUEST_TIMEOUT }),
+        axios.get(`${API_BASE}/api/sentiment/${ticker}`, { timeout: REQUEST_TIMEOUT }),
       ]);
       setPriceData(priceRes.data.prices);
       setArticles(sentimentRes.data.articles);
@@ -60,7 +61,14 @@ export default function App() {
       else if (score < -0.2) setSentimentLabel("Negative");
       else setSentimentLabel("Neutral");
     } catch (err) {
-      setError("Something went wrong. Is the Flask server running?");
+      const apiError = err.response?.data?.error;
+      const source = err.response?.data?.source;
+      const timeoutMessage = err.code === "ECONNABORTED"
+        ? "The request timed out while waiting for the backend."
+        : null;
+      setError(apiError
+        ? `${source ? `${source} error: ` : ""}${apiError}`
+        : timeoutMessage || "Something went wrong while contacting the backend.");
     }
     setLoading(false);
   };
@@ -85,22 +93,22 @@ export default function App() {
     fontFamily: "'Courier New', monospace",
   });
 
-  const rawChartData = priceData.map((p) => {
-  const match = articles.find((a) => a.date === p.date);
+  const sentimentByDate = articles.reduce((acc, article) => {
+    if (!acc[article.date]) {
+      acc[article.date] = { total: 0, count: 0 };
+    }
+    acc[article.date].total += article.score;
+    acc[article.date].count += 1;
+    return acc;
+  }, {});
+
+  const chartData = priceData.map((p) => {
+  const sentimentDay = sentimentByDate[p.date];
   return {
     date: p.date.slice(5),
     price: parseFloat(p.close.toFixed(2)),
-    sentiment: match ? match.score : null,
-  };
-});
-
-// Forward-fill sentiment so line connects across null days
-let lastSentiment = null;
-const chartData = rawChartData.map((d) => {
-  if (d.sentiment !== null) lastSentiment = d.sentiment;
-  return {
-    ...d,
-    sentiment: lastSentiment,
+    sentiment: sentimentDay ? parseFloat((sentimentDay.total / sentimentDay.count).toFixed(3)) : null,
+    sentimentArticles: sentimentDay?.count || 0,
   };
 });
 
@@ -241,7 +249,7 @@ const chartData = rawChartData.map((d) => {
                   }} />
                   <Legend wrapperStyle={{ fontSize: "11px", color: colors.muted, fontFamily: "Courier New" }} />
                   <Line yAxisId="price" type="monotone" dataKey="price" stroke={colors.price} strokeWidth={2} dot={false} name="Price ($)" />
-                  <Line yAxisId="sentiment" type="monotone" dataKey="sentiment" stroke={colors.sentiment} strokeWidth={2} dot={{ r: 4, fill: colors.sentiment }} name="Sentiment Score" />
+                  <Line yAxisId="sentiment" type="monotone" dataKey="sentiment" stroke={colors.sentiment} strokeWidth={2} dot={{ r: 4, fill: colors.sentiment }} connectNulls name="Daily Avg Sentiment" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>

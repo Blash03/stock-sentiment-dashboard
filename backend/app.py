@@ -1,7 +1,11 @@
 from flask import Flask, jsonify
+from dotenv import load_dotenv
+import os
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 from data import get_stock_data, get_news
 from sentiment import analyze_sentiment
-import os
 
 app = Flask(__name__)
 
@@ -50,7 +54,7 @@ def stock(ticker):
         data = get_stock_data(ticker.upper())
         return jsonify({'ticker': ticker.upper(), 'prices': data})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'source': 'stock'}), 502
 
 @app.route('/api/sentiment/<ticker>')
 def sentiment(ticker):
@@ -67,7 +71,7 @@ def sentiment(ticker):
             'articles': scored
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'source': 'sentiment'}), 502
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

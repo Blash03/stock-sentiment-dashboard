@@ -5,6 +5,7 @@ import json
 HF_TOKEN = os.getenv("HF_TOKEN")
 API_URL = "https://router.huggingface.co/hf-inference/models/ProsusAI/finbert"
 HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
+REQUEST_TIMEOUT = 15
 
 def analyze_sentiment(headlines):
     results = []
@@ -16,8 +17,10 @@ def analyze_sentiment(headlines):
             response = requests.post(
                 API_URL,
                 headers=HEADERS,
-                json={"inputs": title[:512]}
+                json={"inputs": title[:512]},
+                timeout=REQUEST_TIMEOUT
             )
+            response.raise_for_status()
             # Handle response whether it comes back as string or parsed
             raw = response.text
             data = json.loads(raw)
